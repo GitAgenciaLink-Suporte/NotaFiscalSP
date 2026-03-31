@@ -31,7 +31,7 @@ class General
 
     public static function onlyNumbers($value)
     {
-        return is_string($value) || is_array($value) ? preg_replace("/\D+/", "", (string)$value) : "";
+        return is_string($value) || is_array($value) || is_numeric($value) ? preg_replace("/\D+/", "", (string)$value) : "";
     }
 
     public static function filterDate($date)
