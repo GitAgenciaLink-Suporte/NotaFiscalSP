@@ -59,29 +59,43 @@ class Certificate
         $signatureValue = '';
         $pkeyId = openssl_get_privatekey($baseInformation->getCertificate());
         openssl_sign($content, $signatureValue, $pkeyId, OPENSSL_ALGO_SHA1);
-        if (PHP_VERSION_ID < 80000) {
-            openssl_free_key($pkeyId);
-        }
         return base64_encode($signatureValue);
     }
 
-    public static function rpsSignatureString($params)
+    public static function rpsSignatureString($params, $version = 2)
     {
         $document = General::getKey($params, SimpleFieldsEnum::CNPJ) ? General::getKey($params, SimpleFieldsEnum::CNPJ) : General::getKey($params, SimpleFieldsEnum::CPF);
         //Required Fields
-        $string =
-            sprintf('%08s', General::getKey($params, SimpleFieldsEnum::IM_PROVIDER)) .
-            sprintf('%-5s', General::getKey($params, SimpleFieldsEnum::RPS_SERIES)) . // 5 chars
-            sprintf('%012s', General::getKey($params, SimpleFieldsEnum::RPS_NUMBER)) .
-            str_replace('-', '', General::getKey($params, RpsEnum::EMISSION_DATE)) .
-            General::getKey($params, RpsEnum::RPS_TAX) .
-            General::getKey($params, RpsEnum::RPS_STATUS) .
-            ($params[RpsEnum::ISS_RETENTION] == 'false' ? BooleanFields::FALSE : BooleanFields::TRUE) .
-            sprintf('%015s', str_replace(array('.', ','), '', number_format(General::getKey($params, RpsEnum::SERVICE_VALUE), 2))) .
-            sprintf('%015s', str_replace(array('.', ','), '', number_format(General::getKey($params, RpsEnum::DEDUCTION_VALUE), 2))) .
-            sprintf('%05s', General::getKey($params, RpsEnum::SERVICE_CODE)) .
-            ((General::getKey($params, SimpleFieldsEnum::CPF)) ? '1' : '2') .
-            sprintf('%014s', $document);
+        if ($version == 1) {
+            $string =
+                sprintf('%08s', General::getKey($params, SimpleFieldsEnum::IM_PROVIDER)) .
+                sprintf('%-5s', General::getKey($params, SimpleFieldsEnum::RPS_SERIES)) . // 5 chars
+                sprintf('%012s', General::getKey($params, SimpleFieldsEnum::RPS_NUMBER)) .
+                str_replace('-', '', General::getKey($params, RpsEnum::EMISSION_DATE)) .
+                General::getKey($params, RpsEnum::RPS_TAX) .
+                General::getKey($params, RpsEnum::RPS_STATUS) .
+                ($params[RpsEnum::ISS_RETENTION] == 'false' ? BooleanFields::FALSE : BooleanFields::TRUE) .
+                sprintf('%015s', str_replace(array('.', ','), '', number_format(General::getKey($params, RpsEnum::SERVICE_VALUE), 2))) .
+                sprintf('%015s', str_replace(array('.', ','), '', number_format(General::getKey($params, RpsEnum::DEDUCTION_VALUE), 2))) .
+                sprintf('%05s', General::getKey($params, RpsEnum::SERVICE_CODE)) .
+                ((General::getKey($params, SimpleFieldsEnum::CPF)) ? '1' : '2') .
+                sprintf('%014s', $document);
+        }
+        if ($version == 2) {
+            $string =
+                sprintf('%012s', General::getKey($params, SimpleFieldsEnum::IM_PROVIDER)) .
+                sprintf('%-5s', General::getKey($params, SimpleFieldsEnum::RPS_SERIES)) . // 5 chars
+                sprintf('%012s', General::getKey($params, SimpleFieldsEnum::RPS_NUMBER)) .
+                str_replace('-', '', General::getKey($params, RpsEnum::EMISSION_DATE)) .
+                General::getKey($params, RpsEnum::RPS_TAX) .
+                General::getKey($params, RpsEnum::RPS_STATUS) .
+                ($params[RpsEnum::ISS_RETENTION] == 'false' ? BooleanFields::FALSE : BooleanFields::TRUE) .
+                sprintf('%015s', str_replace(array('.', ','), '', number_format(General::getKey($params, RpsEnum::SERVICE_VALUE_FINAL), 2))) .
+                sprintf('%015s', str_replace(array('.', ','), '', number_format(General::getKey($params, RpsEnum::DEDUCTION_VALUE), 2))) .
+                sprintf('%05s', General::getKey($params, RpsEnum::SERVICE_CODE)) .
+                ((General::getKey($params, SimpleFieldsEnum::CPF)) ? '1' : '2') .
+                sprintf('%014s', $document);
+        }
 
         // AVAILABLE ON RELEASE 2
 
@@ -104,7 +118,7 @@ class Certificate
     {
         $string = '';
         foreach ($array as $key => $value) {
-            if (is_array($value)){
+            if (is_array($value)) {
                 $value = Certificate::makeXmlString($value);
             }
             $string .= '<' . $key . '>' . $value . '</' . $key . '>';
@@ -116,5 +130,4 @@ class Certificate
     {
         return '<PedidoCancelamentoNFTSDetalheNFTS>' . Certificate::makeXmlString($elements) . '</PedidoCancelamentoNFTSDetalheNFTS>';
     }
-
 }

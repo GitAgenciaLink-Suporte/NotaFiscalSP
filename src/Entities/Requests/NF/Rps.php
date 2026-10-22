@@ -22,11 +22,13 @@ class Rps implements UserRequest
     private $statusRps;
     private $tributacaoRps;
     private $valorServicos;
+    private $ValorFinalCobrado;
     private $valorDeducoes;
     private $valorPIS;
     private $valorCOFINS;
     private $valorINSS;
     private $valorIR;
+    private $valorIPI;
     private $valorCSLL;
     private $codigoServico;
     private $aliquotaServicos;
@@ -60,19 +62,51 @@ class Rps implements UserRequest
     private $cep;
     private $cpf;
     private $cnpj;
+    private $exigibilidadeSuspensa;
+    private $NBS;
+    private $cLocPrestacao;
+    private $finNFSe;
+    private $indFinal;
+    private $cIndOp;
+    private $indDest;
+    private $cClassTrib;
+    private $retencaoPisCofins;
 
-    public function __construct()
+    public function __construct(private $version = 2)
     {
         $this->setTipoRps(RPSType::RECIBO_PROVISORIO);
         $this->setStatusRps(Status::NORMAL);
         $this->setDataEmissao(date('Y-m-d'));
         $this->setTributacaoRps(TaxType::IN_SP);
         $this->setValorDeducoes(0);
-        $this->setValorServicos(0);
         $this->setIssRetido(false);
         $this->setSerieRps('A');
         $this->setAliquotaServicos('0');
-//        $this->setCidade(3550308); // SP CODE
+
+        if ($this->version == 1) {
+            $this->setValorServicos(0);
+            $this->setRetencaoPisCofins('0');
+        }
+
+        if ($this->version == 2) {
+            // $this->setRetencaoPisCofins('0');
+            $this->setValorPIS(0);
+            $this->setValorCOFINS(0);
+            $this->setValorINSS(0);
+            $this->setValorIR(0);
+            $this->setValorIPI(0);
+            $this->setValorCSLL(0);
+            $this->setExigibilidadeSuspensa(0);
+            $this->setcLocPrestacao(3550308); // SP CODE
+            $this->setValorFinalCobrado(0);
+            $this->setFinNFSe(0);
+            $this->setIndFinal(0);
+            $this->setIndDest(0);
+        }
+        // $this->setValorCargaTributaria(0);
+        // $this->setCidade(3550308); // SP CODE
+
+
     }
 
     /**
@@ -94,53 +128,117 @@ class Rps implements UserRequest
     public function toArray()
     {
 
-        return [
-            SimpleFieldsEnum::RPS_SERIES => $this->serieRps,
-            SimpleFieldsEnum::IM_PROVIDER => $this->inscricaoPrestador,
-            SimpleFieldsEnum::RPS_NUMBER => $this->numeroRps,
-            RpsEnum::RPS_TYPE => $this->tipoRps,
-            RpsEnum::EMISSION_DATE => $this->dataEmissao,
-            RpsEnum::RPS_STATUS => $this->statusRps,
-            RpsEnum::RPS_TAX => $this->tributacaoRps,
-            RpsEnum::SERVICE_VALUE => $this->valorServicos,
-            RpsEnum::DEDUCTION_VALUE => $this->valorDeducoes,
-            RpsEnum::PIS_VALUE => $this->valorPIS,
-            RpsEnum::COFINS_VALUE => $this->valorCOFINS,
-            RpsEnum::INSS_VALUE => $this->valorINSS,
-            RpsEnum::IR_VALUE => $this->valorIR,
-            RpsEnum::CSLL_VALUE => $this->valorCSLL,
-            RpsEnum::SERVICE_CODE => $this->codigoServico,
-            RpsEnum::SERVICE_TAX => $this->aliquotaServicos,
-            RpsEnum::ISS_RETENTION => $this->issRetido,
-            RpsEnum::DISCRIMINATION => $this->discriminacao,
-            RpsEnum::CPFCNPJ_INTERMEDIARY => $this->cpfIntermediario,
-            RpsEnum::IM_INTERMEDIARY => $this->inscricaoMunicipalIntermediario,
-            RpsEnum::ISS_RETENTION_INTERMEDIARY => $this->issRetidoIntermediario,
-            RpsEnum::EMAIL_INTERMEDIARY => $this->emailIntermediario,
-            RpsEnum::TAX_VALUE_INTERMEDIARY => $this->valorCargaTributaria,
-            RpsEnum::TAX_PERCENT_INTERMEDIARY => $this->percentualCargaTributaria,
-            RpsEnum::TAX_ORIGIN => $this->fonteCargaTributaria,
-            RpsEnum::CEI_CODE => $this->codigoCEI,
-            RpsEnum::WORK_REGISTRATION => $this->matriculaObra,
-            RpsEnum::CITY_INSTALLMENT => $this->municipioPrestacao,
-            RpsEnum::TOTAL_VALUE => $this->valortotalRecebido,
-            RpsEnum::ENCAPSULATION_NUMBER => $this->numeroEncapsulamento,
-            RpsEnum::IM_TAKER => $this->inscricaoMunicipalTomador,
-            RpsEnum::IE_TAKER => $this->inscricaoEstadualTomador,
-            RpsEnum::CPFCNPJ_TAKER => $this->cpfCnpjTomador,
-            RpsEnum::CORPORATE_NAME_TAKER => $this->razaoSocialTomador,
-            RpsEnum::EMAIL_TAKER => $this->emailTomador,
-            SimpleFieldsEnum::TYPE_ADDRESS => $this->tipoLogradouro,
-            SimpleFieldsEnum::ADDRESS => $this->logradouro,
-            SimpleFieldsEnum::ADDRESS_NUMBER => $this->numeroEndereco,
-            SimpleFieldsEnum::ADDRESS_COMPLEMENT => $this->complementoEndereco,
-            SimpleFieldsEnum::NEIGHBORHOOD => $this->bairro,
-            SimpleFieldsEnum::CITY => $this->cidade,
-            SimpleFieldsEnum::STATE => $this->uf,
-            SimpleFieldsEnum::ZIP_CODE => $this->cep,
-            SimpleFieldsEnum::CPF => $this->cpf,
-            SimpleFieldsEnum::CNPJ => $this->cnpj,
-        ];
+        if ($this->version == 1) {
+            return [
+                SimpleFieldsEnum::RPS_SERIES => $this->serieRps,
+                SimpleFieldsEnum::IM_PROVIDER => $this->inscricaoPrestador,
+                SimpleFieldsEnum::RPS_NUMBER => $this->numeroRps,
+                RpsEnum::RPS_TYPE => $this->tipoRps,
+                RpsEnum::EMISSION_DATE => $this->dataEmissao,
+                RpsEnum::RPS_STATUS => $this->statusRps,
+                RpsEnum::RPS_TAX => $this->tributacaoRps,
+                RpsEnum::SERVICE_VALUE => $this->valorServicos,
+                RpsEnum::DEDUCTION_VALUE => $this->valorDeducoes,
+                RpsEnum::PIS_VALUE => $this->valorPIS,
+                RpsEnum::COFINS_VALUE => $this->valorCOFINS,
+                RpsEnum::INSS_VALUE => $this->valorINSS,
+                RpsEnum::IR_VALUE => $this->valorIR,
+                RpsEnum::CSLL_VALUE => $this->valorCSLL,
+                RpsEnum::SERVICE_CODE => $this->codigoServico,
+                RpsEnum::SERVICE_TAX => $this->aliquotaServicos,
+                RpsEnum::ISS_RETENTION => $this->issRetido,
+                RpsEnum::DISCRIMINATION => $this->discriminacao,
+                RpsEnum::CPFCNPJ_INTERMEDIARY => $this->cpfIntermediario,
+                RpsEnum::IM_INTERMEDIARY => $this->inscricaoMunicipalIntermediario,
+                RpsEnum::ISS_RETENTION_INTERMEDIARY => $this->issRetidoIntermediario,
+                RpsEnum::EMAIL_INTERMEDIARY => $this->emailIntermediario,
+                RpsEnum::TAX_VALUE_INTERMEDIARY => $this->valorCargaTributaria,
+                RpsEnum::TAX_PERCENT_INTERMEDIARY => $this->percentualCargaTributaria,
+                RpsEnum::TAX_ORIGIN => $this->fonteCargaTributaria,
+                RpsEnum::RETENTION_PIS_CONFIS => $this->retencaoPisCofins,
+                RpsEnum::CEI_CODE => $this->codigoCEI,
+                RpsEnum::WORK_REGISTRATION => $this->matriculaObra,
+                RpsEnum::CITY_INSTALLMENT => $this->municipioPrestacao,
+                RpsEnum::TOTAL_VALUE => $this->valortotalRecebido,
+                RpsEnum::ENCAPSULATION_NUMBER => $this->numeroEncapsulamento,
+                RpsEnum::IM_TAKER => $this->inscricaoMunicipalTomador,
+                RpsEnum::IE_TAKER => $this->inscricaoEstadualTomador,
+                RpsEnum::CPFCNPJ_TAKER => $this->cpfCnpjTomador,
+                RpsEnum::CORPORATE_NAME_TAKER => $this->razaoSocialTomador,
+                RpsEnum::EMAIL_TAKER => $this->emailTomador,
+                SimpleFieldsEnum::TYPE_ADDRESS => $this->tipoLogradouro,
+                SimpleFieldsEnum::ADDRESS => $this->logradouro,
+                SimpleFieldsEnum::ADDRESS_NUMBER => $this->numeroEndereco,
+                SimpleFieldsEnum::ADDRESS_COMPLEMENT => $this->complementoEndereco,
+                SimpleFieldsEnum::NEIGHBORHOOD => $this->bairro,
+                SimpleFieldsEnum::CITY => $this->cidade,
+                SimpleFieldsEnum::STATE => $this->uf,
+                SimpleFieldsEnum::ZIP_CODE => $this->cep,
+                SimpleFieldsEnum::CPF => $this->cpf,
+                SimpleFieldsEnum::CNPJ => $this->cnpj,
+            ];
+        }
+
+        if ($this->version == 2) {
+            return [
+                SimpleFieldsEnum::RPS_SERIES => $this->serieRps,
+                SimpleFieldsEnum::IM_PROVIDER => $this->inscricaoPrestador,
+                SimpleFieldsEnum::RPS_NUMBER => $this->numeroRps,
+                RpsEnum::RPS_TYPE => $this->tipoRps,
+                RpsEnum::EMISSION_DATE => $this->dataEmissao,
+                RpsEnum::RPS_STATUS => $this->statusRps,
+                RpsEnum::RPS_TAX => $this->tributacaoRps,
+                RpsEnum::SERVICE_VALUE_FINAL => $this->ValorFinalCobrado,
+                RpsEnum::DEDUCTION_VALUE => $this->valorDeducoes,
+                RpsEnum::PIS_VALUE => $this->valorPIS,
+                RpsEnum::COFINS_VALUE => $this->valorCOFINS,
+                RpsEnum::INSS_VALUE => $this->valorINSS,
+                RpsEnum::IR_VALUE => $this->valorIR,
+                RpsEnum::IPI_VALUE => $this->valorIPI,
+                RpsEnum::CSLL_VALUE => $this->valorCSLL,
+                RpsEnum::SERVICE_CODE => $this->codigoServico,
+                RpsEnum::SERVICE_TAX => $this->aliquotaServicos,
+                RpsEnum::ISS_RETENTION => $this->issRetido,
+                RpsEnum::DISCRIMINATION => $this->discriminacao,
+                RpsEnum::CPFCNPJ_INTERMEDIARY => $this->cpfIntermediario,
+                RpsEnum::IM_INTERMEDIARY => $this->inscricaoMunicipalIntermediario,
+                RpsEnum::ISS_RETENTION_INTERMEDIARY => $this->issRetidoIntermediario,
+                RpsEnum::EMAIL_INTERMEDIARY => $this->emailIntermediario,
+                RpsEnum::TAX_VALUE_INTERMEDIARY => $this->valorCargaTributaria,
+                RpsEnum::TAX_PERCENT_INTERMEDIARY => $this->percentualCargaTributaria,
+                RpsEnum::TAX_ORIGIN => $this->fonteCargaTributaria,
+                RpsEnum::RETENTION_PIS_CONFIS => $this->retencaoPisCofins,
+                RpsEnum::CEI_CODE => $this->codigoCEI,
+                RpsEnum::WORK_REGISTRATION => $this->matriculaObra,
+                RpsEnum::CITY_INSTALLMENT => $this->municipioPrestacao,
+                RpsEnum::TOTAL_VALUE => $this->valortotalRecebido,
+                RpsEnum::ENCAPSULATION_NUMBER => $this->numeroEncapsulamento,
+                RpsEnum::IM_TAKER => $this->inscricaoMunicipalTomador,
+                RpsEnum::IE_TAKER => $this->inscricaoEstadualTomador,
+                RpsEnum::CPFCNPJ_TAKER => $this->cpfCnpjTomador,
+                RpsEnum::CORPORATE_NAME_TAKER => $this->razaoSocialTomador,
+                RpsEnum::EMAIL_TAKER => $this->emailTomador,
+                RpsEnum::ENFORCEABILITY_SUSPENDED => $this->exigibilidadeSuspensa,
+
+                RpsEnum::NBS => $this->NBS,
+                RpsEnum::C_LOC_PRESTACAO => $this->cLocPrestacao,
+                RpsEnum::FIN_NFSE => $this->finNFSe,
+                RpsEnum::IND_FINAL => $this->indFinal,
+                RpsEnum::C_IND_OP => $this->cIndOp,
+                RpsEnum::IND_DEST => $this->indDest,
+                RpsEnum::C_CLASS_TRIB => $this->cClassTrib,
+                SimpleFieldsEnum::TYPE_ADDRESS => $this->tipoLogradouro,
+                SimpleFieldsEnum::ADDRESS => $this->logradouro,
+                SimpleFieldsEnum::ADDRESS_NUMBER => $this->numeroEndereco,
+                SimpleFieldsEnum::ADDRESS_COMPLEMENT => $this->complementoEndereco,
+                SimpleFieldsEnum::NEIGHBORHOOD => $this->bairro,
+                SimpleFieldsEnum::CITY => $this->cidade,
+                SimpleFieldsEnum::STATE => $this->uf,
+                SimpleFieldsEnum::ZIP_CODE => $this->cep,
+                SimpleFieldsEnum::CPF => $this->cpf,
+                SimpleFieldsEnum::CNPJ => $this->cnpj,
+            ];
+        }
     }
 
     /**
@@ -308,6 +406,23 @@ class Rps implements UserRequest
         $this->valorServicos = General::filterMonetaryValue($valorServicos);
     }
 
+
+    /**
+     * @return mixed
+     */
+    public function getValorFinalCobrado()
+    {
+        return $this->ValorFinalCobrado;
+    }
+
+    /**
+     * @param mixed $ValorFinalCobrado
+     */
+    public function setValorFinalCobrado($ValorFinalCobrado)
+    {
+        $this->ValorFinalCobrado = General::filterMonetaryValue($ValorFinalCobrado);
+    }
+
     /**
      * @return mixed
      */
@@ -391,6 +506,22 @@ class Rps implements UserRequest
     /**
      * @return mixed
      */
+    public function getValorIPI()
+    {
+        return $this->valorIPI;
+    }
+
+    /**
+     * @param mixed $valorIPI
+     */
+    public function setValorIPI($valorIPI)
+    {
+        $this->valorIPI = $valorIPI;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getValorCSLL()
     {
         return $this->valorCSLL;
@@ -434,6 +565,21 @@ class Rps implements UserRequest
     public function setAliquotaServicos($aliquotaServicos)
     {
         $this->aliquotaServicos = $aliquotaServicos;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRetencaoPisCofins()
+    {
+        return $this->retencaoPisCofins;
+    }
+    /**
+     * @param mixed $retencaoPisCofins
+     */
+    public function setRetencaoPisCofins($retencaoPisCofins)
+    {
+        $this->retencaoPisCofins = $retencaoPisCofins;
     }
 
     /**
@@ -786,7 +932,10 @@ class Rps implements UserRequest
      */
     public function setNumeroEndereco($numeroEndereco)
     {
-        $this->numeroEndereco = General::onlyNumbers($numeroEndereco);
+        $value = General::onlyNumbers($numeroEndereco);
+        if ($value > 0) {
+            $this->numeroEndereco = $value;
+        }
     }
 
     /**
@@ -868,5 +1017,140 @@ class Rps implements UserRequest
     public function setCep($cep)
     {
         $this->cep = sprintf('%08s', General::onlyNumbers($cep));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getExigibilidadeSuspensa()
+    {
+        return $this->exigibilidadeSuspensa;
+    }
+
+    /**
+     * @param mixed $exigibilidadeSuspensa
+     */
+    public function setExigibilidadeSuspensa($exigibilidadeSuspensa)
+    {
+        $this->exigibilidadeSuspensa = $exigibilidadeSuspensa;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNBS()
+    {
+        return $this->NBS;
+    }
+
+    /**
+     * @param mixed $NBS
+     */
+    public function setNBS($NBS)
+    {
+        $this->NBS = sprintf('%09s', General::onlyNumbers($NBS));
+    }
+
+    /**
+     * 
+     * @return mixed
+     */
+    public function getcLocPrestacao()
+    {
+        return $this->cLocPrestacao;
+    }
+
+    /**
+     * @param mixed $cLocPrestacao
+     */
+    public function setcLocPrestacao($cLocPrestacao)
+    {
+        $this->cLocPrestacao = sprintf('%07s', General::onlyNumbers($cLocPrestacao));
+    }
+
+    /**
+     * 
+     * @return mixed
+     */
+    public function getcIndOp()
+    {
+        return $this->cIndOp;
+    }
+
+    /**
+     * @param mixed $cIndOp
+     */
+    public function setcIndOp($cIndOp)
+    {
+        $this->cIndOp = sprintf('%06s', General::onlyNumbers($cIndOp));
+    }
+
+    /**
+     * 
+     * @return mixed
+     */
+    public function getcClassTrib()
+    {
+        return $this->cClassTrib;
+    }
+
+    /**
+     * @param mixed $cClassTrib
+     */
+    public function setcClassTrib($cClassTrib)
+    {
+        $this->cClassTrib = sprintf('%06s', General::onlyNumbers($cClassTrib));
+    }
+
+
+    /**
+     * 
+     * @return mixed
+     */
+    public function getFinNFSe()
+    {
+        return $this->finNFSe;
+    }
+
+    /**
+     * @param mixed $finNFSe
+     */
+    public function setFinNFSe($finNFSe)
+    {
+        $this->finNFSe = $finNFSe;
+    }
+
+    /**
+     * 
+     * @return mixed
+     */
+    public function getIndFinal()
+    {
+        return $this->indFinal;
+    }
+
+    /**
+     * @param mixed $indFinal
+     */
+    public function setIndFinal($indFinal)
+    {
+        $this->indFinal = $indFinal;
+    }
+
+    /**
+     * 
+     * @return mixed
+     */
+    public function getIndDest()
+    {
+        return $this->indDest;
+    }
+
+    /**
+     * @param mixed $indDest
+     */
+    public function setIndDest($indDest)
+    {
+        $this->indDest = $indDest;
     }
 }

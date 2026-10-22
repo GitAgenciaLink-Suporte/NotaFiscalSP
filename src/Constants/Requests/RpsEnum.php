@@ -10,11 +10,13 @@ class RpsEnum
     const RPS_STATUS = 'StatusRPS';
     const RPS_TAX = 'TributacaoRPS';
     const SERVICE_VALUE = 'ValorServicos';
+    const SERVICE_VALUE_FINAL = 'ValorFinalCobrado';
     const DEDUCTION_VALUE = 'ValorDeducoes';
     const PIS_VALUE = 'ValorPIS';
     const COFINS_VALUE = 'ValorCOFINS';
     const INSS_VALUE = 'ValorINSS';
     const IR_VALUE = 'ValorIR';
+    const IPI_VALUE = 'ValorIPI';
     const CSLL_VALUE = 'ValorCSLL';
     const SERVICE_CODE = 'CodigoServico';
     const SERVICE_TAX = 'AliquotaServicos';
@@ -36,16 +38,49 @@ class RpsEnum
     const WORK_REGISTRATION = 'MatriculaObra';
     const CITY_INSTALLMENT = 'MunicipioPrestacao';
     const TOTAL_VALUE = 'ValorTotalRecebido';
+    const RETENTION_PIS_CONFIS = 'RetencaoPisCofins';
     const ENCAPSULATION_NUMBER = 'NumeroEncapsulamento';
+    const ENFORCEABILITY_SUSPENDED = 'ExigibilidadeSuspensa';
+    const NBS = 'NBS';
+    const C_LOC_PRESTACAO = 'cLocPrestacao';
+    const IBSCBS = 'IBSCBS';
+    const FIN_NFSE = 'finNFSe';
+    const IND_FINAL = 'indFinal';
+    const C_IND_OP = 'cIndOp';
+    const IND_DEST = 'indDest';
+    const VALUES = 'valores';
+    const TRIB = 'trib';
+    const G_IBSCBS = 'gIBSCBS';
+    const C_CLASS_TRIB = 'cClassTrib';
 
-    public static function simpleTypes()
+
+    public static function simpleTypes($version)
     {
+        if ($version == 1) {
+            return [
+                RpsEnum::RPS_TYPE,
+                RpsEnum::EMISSION_DATE,
+                RpsEnum::RPS_STATUS,
+                RpsEnum::RPS_TAX,
+                RpsEnum::SERVICE_VALUE,
+                RpsEnum::DEDUCTION_VALUE,
+                RpsEnum::PIS_VALUE,
+                RpsEnum::COFINS_VALUE,
+                RpsEnum::INSS_VALUE,
+                RpsEnum::IR_VALUE,
+                RpsEnum::CSLL_VALUE,
+                RpsEnum::SERVICE_CODE,
+                RpsEnum::SERVICE_TAX,
+                RpsEnum::ISS_RETENTION,
+            ];
+        }
+
+
         return [
             RpsEnum::RPS_TYPE,
             RpsEnum::EMISSION_DATE,
             RpsEnum::RPS_STATUS,
             RpsEnum::RPS_TAX,
-            RpsEnum::SERVICE_VALUE,
             RpsEnum::DEDUCTION_VALUE,
             RpsEnum::PIS_VALUE,
             RpsEnum::COFINS_VALUE,
@@ -55,6 +90,8 @@ class RpsEnum
             RpsEnum::SERVICE_CODE,
             RpsEnum::SERVICE_TAX,
             RpsEnum::ISS_RETENTION,
+
+            // RpsEnum::SERVICE_VALUE_FINAL,
         ];
     }
 
